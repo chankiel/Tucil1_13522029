@@ -28,9 +28,8 @@ struct Point{
     4. listPoin : array berisi reward-reward dari sekuens
     5. mtrxWidth: lebar matriks permainan (kolom)
     6. mtrxHeight: tinggi matriks permainan (baris)
-    7. minRewLength: panjang sekuens reward yang paling kecil
-    8. curMaxLength: panjang sekuens maksimal sementara
-    9. exeTime  : waktu eksekusi program
+    7. curMaxLength: panjang sekuens maksimal sementara
+    8. exeTime  : waktu eksekusi program
 
     String:
     1. maxSequence  : sekuens maksimal sementara / isi buffer maksimal sementara
@@ -41,7 +40,7 @@ struct Point{
     1. maxPoint     : vector (array dinamis) untuk menyimpan tahap-tahapan koordinat maksimal
 
 */
-int maxPoin = -9999, maxBuffer, nReward, *listPoin, mtrxWidth, mtrxHeight, minRewLength = 9999,curMaxLength=0, exeTime;
+int maxPoin = -9999, maxBuffer, nReward, *listPoin, mtrxWidth, mtrxHeight,curMaxLength=0, exeTime;
 string maxSequence, *rewardSeq, **matrix;
 vector<Point> maxPoint;
 
@@ -78,7 +77,6 @@ void readFile(string fileName){
     for(int i=0;i<nReward;i++){
         getline(inFile,line);
         line.erase(remove(line.begin(), line.end(), ' '), line.end());
-        if(line.length()<minRewLength) minRewLength = line.length();
         rewardSeq[i] = line;
         getline(inFile,line);
         listPoin[i] = stoi(line);
@@ -105,9 +103,9 @@ void randomizeSequence(int jmlhToken,string token[],int maxSizeSeq){
     for(int i=0;i<nReward;i++){
         listPoin[i] = 10 + rand()%91;
         rewardSeq[i]=token[rand()%jmlhToken];
-        int sizeSeq = 2 + (rand()%(maxSizeSeq-2));
+        int sizeSeq = 2 + (rand()%(maxSizeSeq-1));
         for(int j=1;j<sizeSeq;j++){
-            rewardSeq[i]+=" "+token[rand()%jmlhToken];
+            rewardSeq[i]+=token[rand()%jmlhToken];
         }
     }
 }
@@ -136,17 +134,6 @@ void readRandom(){
 }
 
 /* -----------ALGORITMA BRUTE FORCE--------------- */
-
-// Inisialisasi Matrix visited
-void initVisited(StatusVisit *stat){
-    stat->visited = new bool*[mtrxHeight];
-    for(int i = 0; i < mtrxHeight; i++) {
-        stat->visited[i] = new bool[mtrxWidth];
-        for(int j = 0; j < mtrxWidth; j++) {
-            stat->visited[i][j] = false;
-        }
-    }
-}
 
 // Algoritma string matching, mencari apakah target ada pada seq
 bool findSeq(string seq, string target){
@@ -182,6 +169,17 @@ int countSeq(string seq){
     return bonus;
 }
 
+// Inisialisasi Matrix visited
+void initVisited(StatusVisit *stat){
+    stat->visited = new bool*[mtrxHeight];
+    for(int i = 0; i < mtrxHeight; i++) {
+        stat->visited[i] = new bool[mtrxWidth];
+        for(int j = 0; j < mtrxWidth; j++) {
+            stat->visited[i][j] = false;
+        }
+    }
+}
+
 // Brute Force rekursif untuk mencari semua kemungkinan solusi
 void searchSol(string seq,int x,int y,int buffer,StatusVisit mat,bool horizontal,vector<Point> points){
     points.push_back({x+1,y+1});
@@ -214,7 +212,8 @@ void searchSol(string seq,int x,int y,int buffer,StatusVisit mat,bool horizontal
     }
 }
 
-void bruteForceAlgo(int *exeTime){
+// Initiate rekursif bruteforce
+void bruteForceAlgo(){
     StatusVisit stat;
     vector<Point> points;
     initVisited(&stat);
@@ -227,20 +226,22 @@ void bruteForceAlgo(int *exeTime){
     }
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop-start);
-    *exeTime = duration.count();
+    exeTime = duration.count();
 }
 
+// Tampilan main menu dan input
 void mainMenu(){
     cout<<"Selamat datang pada Cyberpunk 2077 Breach Protocol"<<endl;
     cout<<"Tentukan tipe permainan :"<<endl;
     cout<<"1. Pembacaan informasi permainan dari file txt"<<endl;
     cout<<"2. Informasi permainan otomatis dengan masukan via CLI"<<endl;
-    int tipe;
+    string tipe;
     do{
+        cout<<">> ";
         cin>>tipe;
-    }while(tipe!=1 && tipe!=2);
+    }while(tipe!="1" && tipe!="2");
 
-    if(tipe==1){
+    if(tipe=="1"){
         string filename;
         cout<<"Masukkan nama file permainan: ";
         cin>>filename;
@@ -256,12 +257,43 @@ void mainMenu(){
         }
         cout<<"Berikut sequens beserta bobotnya masing-masing: "<<endl;
         for(int i=0;i<nReward;i++){
-            cout<<rewardSeq[i]<<endl;
-            cout<<listPoin[i]<<endl;
+            for(int j=0;j<rewardSeq[i].length();j++){
+                cout<<rewardSeq[i][j];
+                if(j%2==1)cout<<" ";
+            }
+            cout<<endl<<listPoin[i]<<endl;
         }
     }
 }
 
+// Save solusi ke file
+void saveToFile(){
+    string temp;
+    cout<<"Apakah ingin menyimpan solusi? (y/n): ";
+    do{
+        cin>>temp;
+    }while(temp!="y" && temp!="n");
+    if(temp=="y"){
+        cout<<"Masukkan nama file: ";
+        cin>>temp;
+        temp+=".txt";
+        ofstream outFile(temp);
+        if(maxPoin<0){
+            outFile<<'0';
+        }else{
+            outFile<<maxPoin<<endl;
+            outFile<<maxSequence<<endl;
+            for (auto it = maxPoint.begin(); it < maxPoint.end(); it++) {
+                outFile<<it->x<< " "<<it->y;
+                if(it+1 != maxPoint.end()){
+                    outFile<<endl;
+                }
+            }
+        }  
+    }
+}
+
+// Tampilan output result solusi
 void outputResult(){
     if(maxPoin != -9999){
         for(int i=1;2*i<curMaxLength-1;i++){
@@ -286,37 +318,12 @@ void outputResult(){
         }
     }
     cout<<"Waktu eksekusi program: "<<exeTime<<" ms"<<endl;
-
-    // Penyimpanan Solusi pada file .txt
-    string temp;
-    cout<<"Apakah ingin menyimpan solusi? (y/n): ";
-    do{
-        cin>>temp;
-    }while(temp!="y" && temp!="n");
-    if(temp=="y"){
-        cout<<"Masukkan nama file: ";
-        cin>>temp;
-        temp+=".txt";
-        ofstream outFile(temp);
-        outFile<<maxPoin<<endl;
-        if(maxPoin != -9999){
-            outFile<<maxSequence<<endl;
-            for (auto it = maxPoint.begin(); it != maxPoint.end(); ++it) {
-                outFile<<it->x<< " "<<it->y<<endl;
-            }
-        }
-    }
 }
 
 int main(){
-    string ans;
-    do{
-        mainMenu();
-        outputResult();
-        cout<<"Terima kasih telah menggunakan program kami!"<<endl;
-        cout<<"Apakah anda ingin menggunakan program kami kembali? (y/n) : ";
-        do{
-            cin>>ans;
-        }while(ans!="y" && ans!="n");
-    }while(ans == "y");
+    mainMenu();
+    bruteForceAlgo();
+    outputResult();
+    saveToFile();
+    cout<<"Terima kasih telah menggunakan program kami!"<<endl;
 }
