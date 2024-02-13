@@ -49,6 +49,21 @@ cd  src
 g++ -o main main.cpp
 ```
 
+4. Jika ingin melakukan pembacaan dari file,s iapkan file .txt terlebih dahulu sebagai tempat info permainan. Simpan file dengan format sebagai berikut.
+```
+buffer_size
+matrix_width matrix_height
+matrix
+number_of_sequences
+sequences_1
+sequences_1_reward
+sequences_2
+sequences_2_reward
+…
+sequences_n
+sequences_n_reward
+```
+
 4. Kemudian jalankan executable filenya
 ```
 ./main
