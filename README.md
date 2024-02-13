@@ -76,4 +76,7 @@ sequences_n_reward
 - Repository : https://github.com/chankiel/Tucil1_13522029
 - Issue tracker :
    - If you encounter any issues with the program, come across any disruptive bugs, or have any suggestions for improvement, please don't hesitate to reach out by sending messages to our contributors social media. Your feedback is greatly appreciated.
-- Github main contributor : Ignatius Jhon Hezkiel Chan - https://github.com/chankiel
+- Github main contributor : 
+  Ignatius Jhon Hezkiel Chan 
+  13522029 
+  https://github.com/chankiel
